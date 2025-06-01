@@ -5,8 +5,7 @@ import numpy as np
 import base64
 
 app = Flask(__name__)
-model = YOLO("best6.pt")
-
+model = YOLO("best6.pt", fuse=False)
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
