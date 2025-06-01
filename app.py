@@ -11,12 +11,13 @@ app = Flask(__name__)
 # Ensure 'best6.onnx' is in the same directory as this Flask app,
 # or provide the full path to the file.
 try:
-    model = YOLO("best6.onnx")
+    # Explicitly set task='detect' to prevent the warning about guessing task
+    model = YOLO("best6.onnx", task='detect')
     print("Model loaded successfully from best6.onnx")
 except Exception as e:
     print(f"Error loading model: {e}")
-    # You might want to handle this error more gracefully in a production environment
-    # e.g., by returning an error page or stopping the app.
+    # In a production environment, you might want to log this more robustly
+    # or exit the application if the model is critical.
     model = None # Set model to None if loading fails
 
 @app.route('/', methods=['GET', 'POST'])
@@ -42,7 +43,8 @@ def index():
         return render_template("index.html", error="No image selected")
 
     if model is None:
-        return render_template("index.html", error="Model failed to load. Please check server logs.")
+        # If model loading failed at startup, return an error
+        return render_template("index.html", error="Model failed to load on server. Please check server logs.")
 
     try:
         # Read image directly into memory
@@ -58,6 +60,8 @@ def index():
         results = model.predict(source=img, save=False, show=False)
 
         if not results or len(results) == 0:
+            # This case should ideally be caught by 'boxes is not None and len(boxes) > 0' below
+            # but serves as a safeguard for unexpected empty results.
             raise ValueError("No results from model prediction. This might indicate an issue with the model or input.")
 
         # Get the original image from results and convert to RGB for consistent drawing
@@ -144,6 +148,7 @@ def predict_realtime():
         return jsonify({'error': 'No image selected'}), 400
 
     if model is None:
+        # If model loading failed at startup, return an error
         return jsonify({'error': 'Model failed to load on server.'}), 500
 
     try:
@@ -208,4 +213,4 @@ if __name__ == '__main__':
         os.makedirs('templates')
     
     # Run the Flask app
-    app.run(host='0.0.0.0', debug=True)
+    app.run(debug=True)
