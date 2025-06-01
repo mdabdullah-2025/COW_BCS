@@ -1,4 +1,4 @@
 flask
 ultralytics
 opencv-python
-gunicon
+gunicorn
