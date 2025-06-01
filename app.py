@@ -36,7 +36,7 @@ def index():
             return render_template("index.html", error="Invalid image file")
 
         # Run prediction
-        results = model.predict(source=img, save=False, show=False)
+        results = model.predict(source=img, save=False, show=False,verbose=False,)
 
         if not results or len(results) == 0:
             raise ValueError("No results from model prediction")
