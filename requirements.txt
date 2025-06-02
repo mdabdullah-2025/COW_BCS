@@ -1,5 +1,4 @@
 flask
 ultralytics
 opencv-python
-onnxruntime
 gunicorn
